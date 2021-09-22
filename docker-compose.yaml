@@ -1,0 +1,15 @@
+version: '2.4'
+
+services:
+  poweroutage:
+    image: aaaler/poweroutage
+    build: .
+    cpus: 1
+    mem_limit: 100m
+    environment:
+      SLEEP: 3600
+      TG_CHATID: ${TG_CHATID}
+      TG_TOKEN: ${TG_TOKEN}
+    restart: always
+    volumes:
+    - ./cache:/app/cache

@@ -1,4 +1,4 @@
-import requests,logging,os,wget,urllib,datetime
+import requests,logging,os,wget,urllib,datetime,time
 from bs4 import BeautifulSoup
 from hashlib import md5
 from peewee import *
@@ -58,6 +58,7 @@ def notify_tg ():
         r.notification_sent = True
         r.save()
 
+db = SqliteDatabase(cachedir + 'feed.db')
 class Record(Model):
     URL = CharField(unique=True)
     title = CharField(null = True)
@@ -68,14 +69,16 @@ class Record(Model):
     notification_sent = BooleanField(default=False)
     class Meta:
         database = db
+db.connect()
+db.create_tables([Record], safe=True)
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-db = SqliteDatabase('feed.db')
-db.connect()
-db.create_tables([Record], safe=True)
 
-scrape ( cachedir )
-notify_tg ()
+while True:
+    scrape ( cachedir )
+    notify_tg ()
+    logging.info("Sleeping for another {} seconds".format(os.environ.get('SLEEP')))
+    time.sleep(int(os.environ.get('SLEEP')))
 
