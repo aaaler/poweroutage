@@ -2,10 +2,7 @@ import requests,logging,os,wget,urllib,datetime,time
 from bs4 import BeautifulSoup
 from hashlib import md5
 from peewee import *
-try:
-    from PIL import Image
-except ImportError:
-    import Image
+from PIL import Image,ImageFont,ImageDraw
 import pytesseract
 
 cachedir = "./cache/"
@@ -32,12 +29,19 @@ def scrape (cachedir):
                 logging.info ("Fetching pic {} to {}".format(docurl,cachedname))
                 try:
                     wget.download('http://adm-kyivozy.ru/' + docurl, cachedname,bar=None)
-                    rec.text = pytesseract.image_to_string(Image.open(cachedname), lang='rus')
                 except urllib.error.HTTPError as err:
                     with open(cachedname, 'w') as f:
                         logging.warning ("Cached HTTP error {} to {}".format(err,cachedname))
                         f.write(str(err))
                         rec.text=str(err)
+                image = Image.open(cachedname)
+                rec.text = pytesseract.image_to_string(image, lang='rus')
+                watermark_image = image.copy()
+                draw = ImageDraw.Draw(watermark_image)
+                font = ImageFont.truetype("NotoSansMono-Medium.ttf", 20)
+                draw.text((0, 0), "https://t.me/f620_210", (0, 0, 0), font=font)
+                watermark_image.save(cachedname,"JPEG")
+
             else:
                 with open(cachedname, 'w') as f:
                     logging.info ("Fetching text from {} to {}".format(href,cachedname))
@@ -49,7 +53,7 @@ def scrape (cachedir):
 def notify_tg ():
     import telegram
     bot = telegram.Bot(token=os.environ.get('TG_TOKEN'))
-    query = Record.select().where((Record.text ** '%620-210%' | Record.text ** '%Троицкое%' | Record.text ** '%ЛОМО%') & (Record.notification_sent == False))
+    query = Record.select().where((Record.text ** '%620-210%' | Record.text ** '%Троицкое%' | Record.text ** '%ЛОМО%') & (Record.notification_sent == False)).order_by(Record.created)
     for r in query:
         logging.info("Sending alert about {} ({})".format(r.title, r.URL))
         f = open('./cache/' + md5(r.URL.encode('utf-8')).hexdigest(), 'rb')
