@@ -39,7 +39,7 @@ def scrape (cachedir):
                 watermark_image = image.copy()
                 draw = ImageDraw.Draw(watermark_image)
                 font = ImageFont.truetype("NotoSansMono-Medium.ttf", 20)
-                draw.text((0, 0), "https://t.me/f620_210", (0, 0, 0), font=font)
+                draw.text((0, 0), "https://t.me/svet_v_vaskelovo", (0, 0, 0), font=font)
                 watermark_image.save(cachedname,"JPEG")
 
             else:
