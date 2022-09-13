@@ -8,30 +8,31 @@ import pytesseract
 cachedir = "./cache/"
 
 def scrape (cachedir):
-    url = "http://adm-kyivozy.ru/index.php?page=news"
+    url = "https://adm-kyivozy.ru/news/c:elektroenergiya"
     cached = os.listdir(cachedir)
     r1 = requests.get(url)
     newsfeedpage = r1.content
     newsfeedsoup = BeautifulSoup(newsfeedpage, 'html5lib')
     articles = []
-    for article in newsfeedsoup.find_all('div', class_='NewsSummary'):
-        href = article.find_all("a")[0]['href']
+    for article in newsfeedsoup.find_all('a', class_='uk-card'):
+        href = article['href']
         cachedname = cachedir + md5(href.encode('utf-8')).hexdigest()
         if md5(href.encode('utf-8')).hexdigest() not in cached:
             rec, rec_created = Record.get_or_create (URL=href)
-            rec.title = article.find_all("a")[0]['title']
+            rec.title = article.find_all('h3')[0].string.strip()
             if rec_created: rec.save()
+            logging.info ("Fetching article {}".format(href))
             r1 = requests.get(href)
             articlepage = r1.content
             articlesoup = BeautifulSoup(articlepage, 'html5lib')
-            if articlesoup.select('#NewsPostDetailContent')[0].find("img"):
-                docurl = articlesoup.select('#NewsPostDetailContent')[0].find("img")['src']
+            for subarticle in articlesoup.find_all('figure'):
+                docurl = subarticle.find("img")['data-src']
                 logging.info ("Fetching pic {} to {}".format(docurl,cachedname))
                 try:
-                    wget.download('http://adm-kyivozy.ru/' + docurl, cachedname,bar=None)
+                    urllib.request.urlretrieve(urllib.parse.quote(docurl, safe='/:'), cachedname)
                 except urllib.error.HTTPError as err:
                     with open(cachedname, 'w') as f:
-                        logging.warning ("Cached HTTP error {} to {}".format(err,cachedname))
+                        logging.warning ("HTTP error {} to {}".format(err,cachedname))
                         f.write(str(err))
                         rec.text=str(err)
                 image = Image.open(cachedname)
@@ -42,18 +43,12 @@ def scrape (cachedir):
                 draw.text((0, 0), "https://t.me/svet_v_vaskelovo", (0, 0, 0), font=font)
                 watermark_image.save(cachedname,"JPEG")
 
-            else:
-                with open(cachedname, 'w') as f:
-                    logging.info ("Fetching text from {} to {}".format(href,cachedname))
-                    text_content = str(articlesoup.select('#NewsPostDetailContent'))
-                    f.write(text_content)
-                    rec.text=text_content
             rec.save()
 
 def notify_tg ():
     import telegram
     bot = telegram.Bot(token=os.environ.get('TG_TOKEN'))
-    query = Record.select().where((Record.text ** '%620-210%' | Record.text ** '%620-110%' | Record.text ** '%Троицкое%' | Record.text ** '%ЛОМО%') & (Record.notification_sent == False)).order_by(Record.created)
+    query = Record.select().where((Record.text ** '%620-210%' | Record.text ** '%620-110%' | Record.text ** '%Троицкое%' | Record.text ** '%ЛОМО%') & (Record.notification_sent == False)).order_by(Record.created.desc())
     for r in query:
         logging.info("Sending alert about {} ({})".format(r.title, r.URL))
         f = open('./cache/' + md5(r.URL.encode('utf-8')).hexdigest(), 'rb')
