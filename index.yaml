@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  poweroutage:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2022-06-02T17:23:17.922302556+03:00"
+    description: poweroutage notifications from local administration
+    digest: cdd0d826a1d32bf10d8d5e20cb9cce9b66170cde98f7800785adb5dbaeb7528e
+    name: poweroutage
+    type: application
+    urls:
+    - https://aaaler.github.io/poweroutage/poweroutage-0.1.0.tgz
+    version: 0.1.0
+generated: "2022-06-02T17:23:17.921627541+03:00"
