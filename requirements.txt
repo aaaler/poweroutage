@@ -8,3 +8,4 @@ requests==2.25.1
 requestsexceptions==1.4.0
 urllib3==1.26.2
 wget==3.2
+pdf2image

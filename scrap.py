@@ -1,4 +1,5 @@
 import requests,logging,os,wget,urllib,datetime,time
+import pdf2image
 from bs4 import BeautifulSoup
 from hashlib import md5
 from peewee import *
@@ -6,6 +7,8 @@ from PIL import Image,ImageFont,ImageDraw
 import pytesseract
 
 cachedir = "./cache/"
+def pdf_to_img(pdf_file):
+    return pdf2image.convert_from_path(pdf_file)
 
 def scrape (cachedir):
     url = "https://adm-kyivozy.ru/news/c:elektroenergiya"
@@ -25,8 +28,8 @@ def scrape (cachedir):
             r1 = requests.get(href)
             articlepage = r1.content
             articlesoup = BeautifulSoup(articlepage, 'html5lib')
-            for subarticle in articlesoup.find_all('figure'):
-                docurl = subarticle.find("img")['data-src']
+            for subarticle in articlesoup.find_all('a', href=True, attrs={'class':'uk-button-small'}):
+                docurl = subarticle['href']
                 logging.info ("Fetching pic {} to {}".format(docurl,cachedname))
                 try:
                     urllib.request.urlretrieve(urllib.parse.quote(docurl, safe='/:'), cachedname)
@@ -35,7 +38,8 @@ def scrape (cachedir):
                         logging.warning ("HTTP error {} to {}".format(err,cachedname))
                         f.write(str(err))
                         rec.text=str(err)
-                image = Image.open(cachedname)
+                images = pdf_to_img(cachedname)
+                image = images[0]
                 rec.text = pytesseract.image_to_string(image, lang='rus')
                 watermark_image = image.copy()
                 draw = ImageDraw.Draw(watermark_image)
