@@ -2,13 +2,24 @@ apiVersion: v1
 entries:
   poweroutage:
   - apiVersion: v2
-    appVersion: 1.0.0
-    created: "2022-06-02T17:23:17.922302556+03:00"
-    description: poweroutage notifications from local administration
+    appVersion: 1.16.0
+    created: "2025-05-30T18:32:43.066067242+03:00"
+    description: A Helm chart for Kubernetes
     digest: cdd0d826a1d32bf10d8d5e20cb9cce9b66170cde98f7800785adb5dbaeb7528e
     name: poweroutage
     type: application
     urls:
-    - https://aaaler.github.io/poweroutage/poweroutage-0.1.0.tgz
+    - poweroutage-0.1.0.tgz
     version: 0.1.0
-generated: "2022-06-02T17:23:17.921627541+03:00"
+  poweroutage-rosseti-lenenergo:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-05-30T18:32:43.066305777+03:00"
+    description: poweroutage notifications from local electric company
+    digest: 52e9f417f8b32083390c68b174100e34cc0886ededc1be8b3a4b2437b8303dcc
+    name: poweroutage-rosseti-lenenergo
+    type: application
+    urls:
+    - poweroutage-rosseti-lenenergo-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-05-30T18:32:43.065731314+03:00"
