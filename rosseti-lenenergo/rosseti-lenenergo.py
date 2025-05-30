@@ -73,7 +73,7 @@ def add_record(conn, record_data):
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO outages (data_record_id, address, start_time, end_time, comment, fias)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
         ''', (
             record_data['data_record_id'],
             record_data['address'],
